@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@nuxt/ui": "^2.18.4",
+    "@nuxtjs/supabase": "^1.4.0",
+    "dotenv": "^16.4.5",
     "nuxt": "^3.13.0",
     "vue": "latest",
     "vue-router": "latest"
