@@ -5,7 +5,7 @@ export const useCurrency = (amount) => {
           currency: 'USD',
         }).format(isRef(amount) ? amount.value : amount);
     })
-    console.log(currency);
+    // console.log(currency);
     return {
       currency,
     };
