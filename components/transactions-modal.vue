@@ -1,33 +1,36 @@
 <template>
-    <UModal v-model="isOpen">
-        <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
-            <template #header> Add Transaction </template>
+  <UModal v-model="isOpen">
+    <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+      <template #header> Add Transaction
+      </template>
 
-            <UForm :state="state" :schema="schema" ref="form" @submit.prevent="save">
-                <UFormGroup :required="true" label="Transaction Type" name="type" class="mb-4">
-                    <USelect v-model="state.type" placeholder="Select the transaction type" :options="types" />
-                </UFormGroup>
+      <UForm :state="state" :schema="schema" ref="form" @submit.prevent="save">
+        <UFormGroup :required="true" label="Transaction Type" name="type" class="mb-4">
+          <USelect v-model="state.type" placeholder="Select the transaction type" :options="types" />
+        </UFormGroup>
 
-                <UFormGroup :required="true" label="Amount" name="amount" class="mb-4">
-                    <UInput v-model.number="state.amount" type="number" placeholder="amount" />
-                </UFormGroup>
+        <UFormGroup :required="true" label="Amount" name="amount" class="mb-4">
+          <UInput v-model.number="state.amount" type="number" placeholder="amount" />
+        </UFormGroup>
 
-                <UFormGroup :required="true" label="Transactions date" name="created_at" class="mb-4">
-                    <UInput v-model="state.created_at" type="date" icon="i-heroicons-calendar-days-20-solid" />
-                </UFormGroup>
-                <UFormGroup label="Description " name="description" class="mb-4">
-                    <UInput v-model="state.description" placeholder="description" />
-                </UFormGroup>
-                   <UFormGroup :required="true" label="Category" name="category" class="mb-4" v-if="state.type === 'Expense'">
-                    <USelect v-model="state.category" placeholder="Category" :options="categories" />
-                </UFormGroup>
+        <UFormGroup :required="true" label="Transactions date" name="created_at" class="mb-4">
+          <UInput v-model="state.created_at" type="date" icon="i-heroicons-calendar-days-20-solid" />
+        </UFormGroup>
+        <UFormGroup label="Description " name="description" class="mb-4">
+          <UInput v-model="state.description" placeholder="description" />
+        </UFormGroup>
+        <UFormGroup :required="true" label="Category" name="category" class="mb-4" v-if="state.type === 'Expense'">
+          <USelect v-model="state.category" placeholder="Category" :options="categories" />
+        </UFormGroup>
 
-                <UButton type="submit" color="black" variant="solid" label="Save" />
-            </UForm>
+        <UButton type="submit" color="black" variant="solid" label="Save" :loading="isLoading" />
+      </UForm>
 
-            <template #footer></template>
-        </UCard>
-    </UModal>
+      <template #footer>
+
+      </template>
+    </UCard>
+  </UModal>
 </template>
 
 <script lang="ts" setup>
@@ -36,9 +39,9 @@ import { z } from 'zod'
 
 
 const props = defineProps({
-    modelValue: Boolean
+  modelValue: Boolean
 })
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'saved'])
 
 
 const defaultSchema = z.object({
@@ -52,6 +55,8 @@ const incomeSchema = z.object({
 const expenseSchema = z.object({
   type: z.literal('Expense'),
   category: z.enum(categories)
+  // перевіряємо чи категорія саме енам тип з категорій що передаємо) 
+
 })
 const investmentSchema = z.object({
   type: z.literal('Investment')
@@ -66,20 +71,60 @@ const schema = z.intersection(
 )
 
 const form = ref()
+const isLoading = ref(false)
+const supabase = useSupabaseClient()
+const toast = useToast()
+
 const save = async () => {
-  form.value.validate()
+  if (form.value.errors.lengh) return
+  // store to sopabase
+  isLoading.value = true
+  try {
+    const { error } = await supabase.from('transactions')
+      .upsert({ ...state.value })
+    if (!error) {
+      toast.add({
+        'title': 'Transaction saved',
+        'icon': 'i-heroicons-check-circle'
+      })
+      isOpen.value = false
+      emit('saved')
+      return
+    }
+    throw error
+  } catch (e) {
+    toast.add({
+      title: 'Transaction not saved',
+      description: e.message,
+      icon: 'i-heroicons-exclamation-circle',
+      color: 'red'
+    })
+  } finally {
+    isLoading.value = false
+  }
 }
 
+const initialState = {
+  type: undefined,
+  amount: 0,
+  created_at: undefined,
+  description: undefined,
+  category: undefined
+}
 const state = ref({
-    type: undefined,
-    amount: 0,
-    created_at: undefined,
-    description: undefined,
-    category: undefined
+  ...initialState
 })
 
+const resetForm = () => {
+  Object.assign(state.value, initialState)
+  form.value.clear()
+}
+
 const isOpen = computed({
-    get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value)
+  get: () => props.modelValue,
+  set: (value) => {
+    if (!value) resetForm()
+    emit('update:modelValue', value)
+  }
 })
 </script>

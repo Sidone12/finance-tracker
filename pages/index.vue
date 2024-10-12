@@ -19,7 +19,7 @@
             </div>
         </div>
         <div>
-            <TransactionsModal v-model="isOpen"/>
+            <TransactionsModal v-model="isOpen" @saved="refreshTransactions()" />
             <UButton icon="i-heroicons-plus-circle" color="white" variant="solid" label="Add" @click="isOpen = true" />
         </div>
     </section>
@@ -28,7 +28,7 @@
         <div v-for="(transactionsOnDay, date) in transactionGroupByDate" :key="date" class="mb-10">
             <DailyTransactionSumary :date="date" :transactions="transactionsOnDay" />
             <Transaction v-for="(transaction, index) in transactionsOnDay" :key="transaction.id"
-                :transaction="transaction" @deleted="refreshTransactions" />
+                :transaction="transaction" @deleted="refreshTransactions()" />
         </div>
     </section>
     <section v-else>
@@ -73,6 +73,8 @@ const fetchTransactions = async () => {
             const { data, error } = await supabase
                 .from('transactions')
                 .select()
+                .order('created_at', { ascending: false })
+                // supabase sorting
             if (error) return []
 
             return data
@@ -98,7 +100,15 @@ const transactionGroupByDate = computed(() => {
         }
         grouped[date].push(transaction)
     }
-    return grouped
+     return grouped
+    // const sortedKeys = Object.keys(grouped).sort().reverse()
+    // const sortedGrouped = {}
+    // for (const key of sortedKeys) {
+    //     sortedGrouped[key] = grouped[key]
+    // }
+    // return sortedGrouped
+    // це приклад сортування по даті наших витрат на фронтенлі! але буду використовувати можливість супербази сортувати однією командою
+   
 })
 
 // console.log(transactionGroupByDate.value)
