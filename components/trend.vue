@@ -1,22 +1,38 @@
 <template>
-<div>
-    <div class="font-bold" :class="[color]">{{ title }}</div>
+  <div>
+    <div
+      class="font-bold"
+      :class="[color]"
+    >
+      {{ title }}
+    </div>
 
     <div class="text-2xl font-extrabold text-black dark:text-white mb-2">
-        <USkeleton class="h-8 w-full" v-if="loading" />
-        <div v-else>{{ currency }}</div>
+      <USkeleton
+        class="h-8 w-full"
+        v-if="loading"
+      />
+      <div v-else>{{ currency }}</div>
     </div>
 
     <div>
-        <USkeleton class="h-6 w-full" v-if="loading" />
-        <div v-else class="flex space-x-1 items-center text-sm">
-            <UIcon :name="icon" class="w-6 h-6" :class="{ 'green': trendingUp, 'red': !trendingUp}" />
-            <div class="text-gray-500 dark:text-gray-400">
-                {{percentageTrend}}% vs last period
-            </div>
-        </div>
+      <USkeleton
+        class="h-6 w-full"
+        v-if="loading"
+      />
+      <div
+        v-else
+        class="flex space-x-1 items-center text-sm"
+      >
+        <UIcon
+          :name="icon"
+          class="w-6 h-6"
+          :class="{ 'green': trendingUp, 'red': !trendingUp}"
+        />
+        <div class="text-gray-500 dark:text-gray-400">{{percentageTrend}}% vs last period</div>
+      </div>
     </div>
-</div>
+  </div>
 </template>
 
 <script setup>
@@ -27,6 +43,8 @@ const props = defineProps({
     color: String,
     loading: Boolean
 })
+const {amount } = toRefs(props)
+
 const trendingUp = computed(
     () => props.amount >= props.lastAmount)
 const icon = computed(
@@ -42,7 +60,8 @@ const percentageTrend = computed(() => {
 
     return Math.ceil(ratio)
 })
-const { currency } = useCurrency(props.amount)
+const { currency } = useCurrency(amount)
+// useCurrency(props.amount) ми не використовуємо реактивне значення і не спрацьовує компутед властивість потрібно модернізувати під реактивне і помилки пропадуть) 
 </script>
 
 <style scoped>
