@@ -1,8 +1,8 @@
 <template>
-  <UModal v-model="isOpen">
+<UModal v-model="isOpen">
     <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
-      <template #header> Add Transaction
-      </template>
+        <template #header> Add Transaction
+</template>
 
       <UForm :state="state" :schema="schema" ref="form" @submit.prevent="save">
         <UFormGroup :required="true" label="Transaction Type" name="type" class="mb-4">
@@ -26,9 +26,9 @@
         <UButton type="submit" color="black" variant="solid" label="Save" :loading="isLoading" />
       </UForm>
 
-      <template #footer>
+<template #footer>
 
-      </template>
+</template>
     </UCard>
   </UModal>
 </template>
@@ -39,92 +39,89 @@ import { z } from 'zod'
 
 
 const props = defineProps({
-  modelValue: Boolean
+    modelValue: Boolean
 })
 const emit = defineEmits(['update:modelValue', 'saved'])
 
 
 const defaultSchema = z.object({
-  created_at: z.string(),
-  description: z.string().optional(),
-  amount: z.number().positive('Amount needs to be more than 0')
+    created_at: z.string(),
+    description: z.string().optional(),
+    amount: z.number().positive('Amount needs to be more than 0')
 })
 const incomeSchema = z.object({
-  type: z.literal('Income')
+    type: z.literal('Income')
 })
 const expenseSchema = z.object({
-  type: z.literal('Expense'),
-  category: z.enum(categories)
-  // перевіряємо чи категорія саме енам тип з категорій що передаємо) 
+    type: z.literal('Expense'),
+    category: z.enum(categories)
+    // перевіряємо чи категорія саме енам тип з категорій що передаємо)
 
 })
 const investmentSchema = z.object({
-  type: z.literal('Investment')
+    type: z.literal('Investment')
 })
 const savingSchema = z.object({
-  type: z.literal('Saving')
+    type: z.literal('Saving')
 })
 
 const schema = z.intersection(
-  z.discriminatedUnion('type', [incomeSchema, expenseSchema, investmentSchema, savingSchema]),
-  defaultSchema
+    z.discriminatedUnion('type', [incomeSchema, expenseSchema, investmentSchema, savingSchema]),
+    defaultSchema
 )
 
 const form = ref()
 const isLoading = ref(false)
 const supabase = useSupabaseClient()
-const toast = useToast()
+const {toastSucces, toastError} = useAppToast()
 
 const save = async () => {
-  if (form.value.errors.lengh) return
-  // store to sopabase
-  isLoading.value = true
-  try {
-    const { error } = await supabase.from('transactions')
-      .upsert({ ...state.value })
-    if (!error) {
-      toast.add({
-        'title': 'Transaction saved',
-        'icon': 'i-heroicons-check-circle'
-      })
-      isOpen.value = false
-      emit('saved')
-      return
+    if (form.value.errors.lengh) return
+    // store to sopabase
+    isLoading.value = true
+    try {
+        const { error } = await supabase.from('transactions')
+            .upsert({ ...state.value })
+        if (!error) {
+            toastSucces({
+                title: 'Transaction saved',
+            })
+            isOpen.value = false
+            emit('saved')
+            return
+        }
+        throw error
+    } catch (e) {
+        toastError({
+            title: 'Transaction not saved',
+            description: e.message,
+        })
+    } finally {
+        isLoading.value = false
     }
-    throw error
-  } catch (e) {
-    toast.add({
-      title: 'Transaction not saved',
-      description: e.message,
-      icon: 'i-heroicons-exclamation-circle',
-      color: 'red'
-    })
-  } finally {
-    isLoading.value = false
-  }
 }
 
 const initialState = {
-  type: undefined,
-  amount: 0,
-  created_at: undefined,
-  description: undefined,
-  category: undefined
+    type: undefined,
+    amount: 0,
+    created_at: undefined,
+    description: undefined,
+    category: undefined
 }
 const state = ref({
-  ...initialState
+    ...initialState
 })
 
 const resetForm = () => {
-  Object.assign(state.value, initialState)
-  form.value.clear()
+    Object.assign(state.value, initialState)
+    form.value.clear()
 }
 
 const isOpen = computed({
-  get: () => props.modelValue,
-  set: (value) => {
-    if (!value) resetForm()
-    emit('update:modelValue', value)
-  }
+    get: () => props.modelValue,
+    set: (value) => {
+        if (!value) resetForm()
+        emit('update:modelValue', value)
+    }
 })
 </script>
