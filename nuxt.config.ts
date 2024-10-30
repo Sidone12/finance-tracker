@@ -10,6 +10,6 @@ export default defineNuxtConfig({
     },
   },
   supabase: {
-    redirect: false,
+    redirect: true,
   },
 });
