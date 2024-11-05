@@ -2,7 +2,7 @@ export const useAppToast = () => {
   const toast = useToast();
 
   return {
-    toastSucces: ({title, description = null}) => {
+    toastSuccess: ({title, description = null}) => {
       toast.add({
         title,
         description,
