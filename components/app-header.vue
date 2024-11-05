@@ -6,7 +6,7 @@
         <div>
             <UDropdown :items="items" :ui="{ item: { disabled: 'cursor-text select-text' }, width: 'w-64' }"
                 v-if="user">
-                <UAvatar src="https://avatars.githubusercontent.com/u/739984?v=4" alt="Avatar" />
+                <UAvatar :src="url" alt="Avatar" />
                 <template #account="{ item }">
                     <div class="text-left">
                         <p>
@@ -28,6 +28,8 @@
 <script setup>
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const {url} = userAvatarUrl()
+
 const items = [
     [{
         slot: 'account',
