@@ -113,21 +113,24 @@ const save = async () => {
     }
 }
 
-const initialState = {
+console.log('MOunted')
+// потрібно щоб стан змінювався до інішл тільки коли ми створюємо нову транзакцію а коли редагуємо потрібно щоб використувався стейт нище
+const initialState = isEditing.value ?{
+    type: props.transaction.type,
+    amount: props.transaction.amount,
+    created_at: props.transaction.created_at.split('T')[0],
+    description: props.transaction.description,
+    category: props.transaction.category
+} :  {
     type: undefined,
     amount: 0,
     created_at: undefined,
     description: undefined,
     category: undefined
 }
-// онвоив функціонал для редагування
-const state = ref(isEditing.value ? {
-    type: props.transaction.type,
-    amount: props.transaction.amount,
-    created_at: props.transaction.created_at.split('T')[0],
-    description: props.transaction.description,
-    category: props.transaction.category
-} : { ...initialState })
+
+
+const state = ref({ ...initialState })
 
 const resetForm = () => {
     Object.assign(state.value, initialState)
