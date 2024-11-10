@@ -15,7 +15,7 @@ import { z } from 'zod'
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 
-const { toastSucces, toastError } = useAppToast()
+const { toastSuccess, toastError } = useAppToast()
 const pending = ref(false)
 
 const state = ref({
@@ -41,7 +41,7 @@ const saveProfile = async () => {
 
         const { error } = await supabase.auth.updateUser(data)
         if (error) throw error
-        toastSucces({
+        toastSuccess({
             title: 'Profile updated',
             describtion: 'Your profile has been updated.'
         })
